@@ -8,6 +8,7 @@ import SkeletonLoader from '@/components/molecules/SkeletonLoader';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import CropCard from '@/components/molecules/CropCard';
+import Modal from '@/components/atoms/Modal';
 import CropForm from '@/components/organisms/CropForm';
 import cropService from '@/services/api/cropService';
 import farmService from '@/services/api/farmService';
@@ -162,7 +163,7 @@ const Crops = () => {
           <p className="text-gray-600 mt-1">Track your planted crops and their growth progress</p>
         </div>
         
-        <Button
+<Button
           onClick={() => setShowForm(true)}
           icon="Plus"
           className="shadow-sm"
@@ -206,23 +207,19 @@ const Crops = () => {
         )}
       </div>
 
-      {/* Form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mb-6 overflow-hidden"
-          >
-            <CropForm
-              crop={editingCrop}
-              onSave={handleSaveCrop}
-              onCancel={handleCancelForm}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+{/* Crop Form Modal */}
+      <Modal
+        isOpen={showForm}
+        onClose={handleCancelForm}
+        title={editingCrop ? 'Edit Crop' : 'Add New Crop'}
+        size="medium"
+      >
+        <CropForm
+          crop={editingCrop}
+          onSave={handleSaveCrop}
+          onCancel={handleCancelForm}
+        />
+      </Modal>
 
       {/* Crops Grid */}
       {filteredCrops.length === 0 ? (

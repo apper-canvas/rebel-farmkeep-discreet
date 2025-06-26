@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import ApperIcon from '@/components/ApperIcon';
 import Button from '@/components/atoms/Button';
 import Card from '@/components/atoms/Card';
+import Modal from '@/components/atoms/Modal';
 import SkeletonLoader from '@/components/molecules/SkeletonLoader';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
@@ -115,7 +116,7 @@ const Farms = () => {
           <p className="text-gray-600 mt-1">Manage your farm properties and locations</p>
         </div>
         
-        <Button
+<Button
           onClick={() => setShowForm(true)}
           icon="Plus"
           className="shadow-sm"
@@ -124,23 +125,19 @@ const Farms = () => {
         </Button>
       </div>
 
-      {/* Form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mb-6 overflow-hidden"
-          >
-            <FarmForm
-              farm={editingFarm}
-              onSave={handleSaveFarm}
-              onCancel={handleCancelForm}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+{/* Farm Form Modal */}
+      <Modal
+        isOpen={showForm}
+        onClose={handleCancelForm}
+        title={editingFarm ? 'Edit Farm' : 'Add New Farm'}
+        size="medium"
+      >
+        <FarmForm
+          farm={editingFarm}
+          onSave={handleSaveFarm}
+          onCancel={handleCancelForm}
+        />
+      </Modal>
 
       {/* Farms List */}
       {farms.length === 0 ? (

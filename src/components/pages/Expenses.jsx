@@ -9,6 +9,7 @@ import Card from '@/components/atoms/Card';
 import SkeletonLoader from '@/components/molecules/SkeletonLoader';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
+import Modal from '@/components/atoms/Modal';
 import ExpenseForm from '@/components/organisms/ExpenseForm';
 import expenseService from '@/services/api/expenseService';
 import farmService from '@/services/api/farmService';
@@ -228,7 +229,7 @@ const Expenses = () => {
           <p className="text-gray-600 mt-1">Track and manage your farm-related expenses</p>
         </div>
         
-        <Button
+<Button
           onClick={() => setShowForm(true)}
           icon="Plus"
           className="shadow-sm"
@@ -291,23 +292,19 @@ const Expenses = () => {
             )}
           </div>
 
-          {/* Form */}
-          <AnimatePresence>
-            {showForm && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <ExpenseForm
-                  expense={editingExpense}
-                  onSave={handleSaveExpense}
-                  onCancel={handleCancelForm}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+{/* Expense Form Modal */}
+          <Modal
+            isOpen={showForm}
+            onClose={handleCancelForm}
+            title={editingExpense ? 'Edit Expense' : 'Record New Expense'}
+            size="medium"
+          >
+            <ExpenseForm
+              expense={editingExpense}
+              onSave={handleSaveExpense}
+              onCancel={handleCancelForm}
+            />
+          </Modal>
 
           {/* Expenses Table */}
           {sortedExpenses.length === 0 ? (

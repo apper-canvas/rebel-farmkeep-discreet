@@ -9,6 +9,7 @@ import SkeletonLoader from '@/components/molecules/SkeletonLoader';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import TaskItem from '@/components/molecules/TaskItem';
+import Modal from '@/components/atoms/Modal';
 import TaskForm from '@/components/organisms/TaskForm';
 import taskService from '@/services/api/taskService';
 import farmService from '@/services/api/farmService';
@@ -244,7 +245,7 @@ const Tasks = () => {
           </p>
         </div>
         
-        <Button
+<Button
           onClick={() => setShowForm(true)}
           icon="Plus"
           className="shadow-sm"
@@ -326,23 +327,19 @@ const Tasks = () => {
         )}
       </div>
 
-      {/* Form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mb-6 overflow-hidden"
-          >
-            <TaskForm
-              task={editingTask}
-              onSave={handleSaveTask}
-              onCancel={handleCancelForm}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+{/* Task Form Modal */}
+      <Modal
+        isOpen={showForm}
+        onClose={handleCancelForm}
+        title={editingTask ? 'Edit Task' : 'Add New Task'}
+        size="medium"
+      >
+        <TaskForm
+          task={editingTask}
+          onSave={handleSaveTask}
+          onCancel={handleCancelForm}
+        />
+      </Modal>
 
       {/* Tasks List */}
       {sortedTasks.length === 0 ? (
