@@ -1,0 +1,34 @@
+[
+  {
+    "Id": 1,
+    "name": "Green Valley Farm",
+    "location": "Riverside County, CA",
+    "size": 150,
+    "sizeUnit": "acres",
+    "createdAt": "2024-01-15T08:00:00Z"
+  },
+  {
+    "Id": 2,
+    "name": "Sunset Orchards",
+    "location": "Fresno County, CA",
+    "size": 85,
+    "sizeUnit": "acres",
+    "createdAt": "2024-02-10T10:30:00Z"
+  },
+  {
+    "Id": 3,
+    "name": "Prairie View Ranch",
+    "location": "Kern County, CA",
+    "size": 220,
+    "sizeUnit": "acres",
+    "createdAt": "2024-01-22T14:15:00Z"
+  },
+  {
+    "Id": 4,
+    "name": "Mountain Springs Farm",
+    "location": "Tulare County, CA",
+    "size": 95,
+    "sizeUnit": "acres",
+    "createdAt": "2024-03-05T09:45:00Z"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "Id": 1,
+    "farmId": 1,
+    "cropId": 1,
+    "title": "Water Tomato Plants",
+    "description": "Deep watering for Roma tomatoes in North Field A",
+    "dueDate": "2024-04-20T07:00:00Z",
+    "priority": "high",
+    "completed": false
+  },
+  {
+    "Id": 2,
+    "farmId": 1,
+    "cropId": 2,
+    "title": "Apply Fertilizer",
+    "description": "Apply nitrogen fertilizer to corn in South Field B",
+    "dueDate": "2024-04-22T09:00:00Z",
+    "priority": "medium",
+    "completed": false
+  },
+  {
+    "Id": 3,
+    "farmId": 2,
+    "cropId": 3,
+    "title": "Prune Apple Trees",
+    "description": "Spring pruning for Gala apple trees in Block 1",
+    "dueDate": "2024-04-18T10:00:00Z",
+    "priority": "low",
+    "completed": true
+  },
+  {
+    "Id": 4,
+    "farmId": 1,
+    "cropId": 4,
+    "title": "Harvest Lettuce",
+    "description": "First harvest of Romaine lettuce from Greenhouse 1",
+    "dueDate": "2024-04-25T06:00:00Z",
+    "priority": "high",
+    "completed": false
+  },
+  {
+    "Id": 5,
+    "farmId": 3,
+    "cropId": 5,
+    "title": "Inspect Wheat Fields",
+    "description": "Check wheat maturity and pest presence in East Section",
+    "dueDate": "2024-04-19T08:00:00Z",
+    "priority": "medium",
+    "completed": false
+  },
+  {
+    "Id": 6,
+    "farmId": 1,
+    "cropId": null,
+    "title": "Equipment Maintenance",
+    "description": "Service irrigation system and check pump operation",
+    "dueDate": "2024-04-21T14:00:00Z",
+    "priority": "high",
+    "completed": false
+  }
+]

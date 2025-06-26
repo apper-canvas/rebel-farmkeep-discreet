@@ -1,0 +1,50 @@
+[
+  {
+    "Id": 1,
+    "farmId": 1,
+    "amount": 250.00,
+    "category": "seeds",
+    "description": "Roma tomato seeds - 5 pounds",
+    "date": "2024-03-10T10:00:00Z"
+  },
+  {
+    "Id": 2,
+    "farmId": 1,
+    "amount": 180.00,
+    "category": "fertilizer",
+    "description": "Nitrogen fertilizer - 50lb bags (4)",
+    "date": "2024-03-15T14:30:00Z"
+  },
+  {
+    "Id": 3,
+    "farmId": 2,
+    "amount": 450.00,
+    "category": "equipment",
+    "description": "Pruning shears and ladder rental",
+    "date": "2024-04-01T09:15:00Z"
+  },
+  {
+    "Id": 4,
+    "farmId": 1,
+    "amount": 320.00,
+    "category": "labor",
+    "description": "Planting assistance - 2 workers, 8 hours",
+    "date": "2024-03-20T16:00:00Z"
+  },
+  {
+    "Id": 5,
+    "farmId": 3,
+    "amount": 125.00,
+    "category": "fuel",
+    "description": "Diesel fuel for tractors",
+    "date": "2024-04-05T11:20:00Z"
+  },
+  {
+    "Id": 6,
+    "farmId": 1,
+    "amount": 85.00,
+    "category": "supplies",
+    "description": "Irrigation pipes and fittings",
+    "date": "2024-04-12T13:45:00Z"
+  }
+]
