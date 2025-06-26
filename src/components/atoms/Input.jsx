@@ -14,18 +14,21 @@ const Input = ({
   className = '',
   ...props
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const hasValue = value && value.toString().length > 0;
-  const showFloatingLabel = isFocused || hasValue;
-
-  const handleChange = (e) => {
+const handleChange = (e) => {
     if (onChange) {
       onChange(e);
     }
   };
-
-  return (
-    <div className={`relative ${className}`}>
+return (
+    <div className={`${className}`}>
+      {/* Label positioned outside input */}
+      {label && (
+        <label className={`block text-sm font-medium mb-2 ${error ? 'text-red-600' : 'text-gray-700'}`}>
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+      )}
+      
       {/* Input Field */}
       <div className="relative">
         {icon && (
@@ -38,9 +41,7 @@ const Input = ({
           type={type}
           value={value}
           onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          placeholder={!showFloatingLabel ? placeholder : ''}
+          placeholder={placeholder}
           disabled={disabled}
           className={`
             w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 bg-white
@@ -54,24 +55,6 @@ const Input = ({
           `}
           {...props}
         />
-        
-        {/* Floating Label */}
-        {label && (
-          <label
-            className={`
-              absolute left-4 transition-all duration-200 pointer-events-none
-              ${icon ? 'left-11' : 'left-4'}
-              ${showFloatingLabel
-                ? 'top-1 text-xs font-medium text-primary bg-white px-1 -ml-1'
-                : 'top-1/2 -translate-y-1/2 text-gray-500'
-              }
-              ${error && showFloatingLabel ? 'text-red-600' : ''}
-            `}
-          >
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-        )}
       </div>
       
       {/* Error Message */}
