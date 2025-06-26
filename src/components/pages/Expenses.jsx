@@ -13,7 +13,7 @@ import Modal from '@/components/atoms/Modal';
 import ExpenseForm from '@/components/organisms/ExpenseForm';
 import expenseService from '@/services/api/expenseService';
 import farmService from '@/services/api/farmService';
-
+import Chart from 'react-apexcharts';
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [farms, setFarms] = useState([]);
@@ -21,10 +21,12 @@ const Expenses = () => {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [selectedFarm, setSelectedFarm] = useState('');
+const [selectedFarm, setSelectedFarm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [categoryTotals, setCategoryTotals] = useState({});
-
+  const [activeTab, setActiveTab] = useState('table');
+  const [chartPeriod, setChartPeriod] = useState('monthly');
+  const [trendData, setTrendData] = useState([]);
   useEffect(() => {
     loadData();
   }, []);
@@ -255,43 +257,91 @@ const Expenses = () => {
           </div>
         </Card>
       )}
+{/* Tabs */}
+      <div className="flex space-x-1 mb-6 bg-surface-100 p-1 rounded-lg max-w-md">
+        <button
+          onClick={() => setActiveTab('table')}
+          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeTab === 'table'
+              ? 'bg-white text-primary shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <ApperIcon name="Table" size={16} />
+            Expenses
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('charts')}
+          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeTab === 'charts'
+              ? 'bg-white text-primary shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <ApperIcon name="BarChart3" size={16} />
+            Charts
+          </div>
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Select
-              placeholder="Filter by farm"
-              value={selectedFarm}
-              onChange={(e) => setSelectedFarm(e.target.value)}
-              options={farmOptions}
-              className="flex-1"
-            />
-            
-            <Select
-              placeholder="Filter by category"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              options={categoryOptions}
-              className="flex-1"
-            />
+          {activeTab === 'table' && (
+            <>
+              {/* Filters */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Select
+                  placeholder="Filter by farm"
+                  value={selectedFarm}
+                  onChange={(e) => setSelectedFarm(e.target.value)}
+                  options={farmOptions}
+                  className="flex-1"
+                />
+                
+                <Select
+                  placeholder="Filter by category"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  options={categoryOptions}
+                  className="flex-1"
+                />
 
-            {(selectedFarm || categoryFilter) && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedFarm('');
-                  setCategoryFilter('');
-                }}
-                icon="X"
-                size="small"
-              >
-                Clear
-              </Button>
-            )}
-          </div>
+                {(selectedFarm || categoryFilter) && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedFarm('');
+                      setCategoryFilter('');
+                    }}
+                    icon="X"
+                    size="small"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
 
+          {activeTab === 'charts' && (
+            <ExpenseCharts 
+              expenses={expenses}
+              farms={farms}
+              selectedFarm={selectedFarm}
+              onFarmChange={setSelectedFarm}
+              chartPeriod={chartPeriod}
+              onPeriodChange={setChartPeriod}
+              categoryOptions={categoryOptions}
+              getCategoryColor={getCategoryColor}
+              getCategoryIcon={getCategoryIcon}
+            />
+          )}
+
+{/* Expense Form Modal */}
 {/* Expense Form Modal */}
           <Modal
             isOpen={showForm}
@@ -305,105 +355,108 @@ const Expenses = () => {
               onCancel={handleCancelForm}
             />
           </Modal>
-
-          {/* Expenses Table */}
-          {sortedExpenses.length === 0 ? (
-            <EmptyState
-              title={expenses.length === 0 ? "No expenses recorded" : "No expenses match your filters"}
-              description={expenses.length === 0 
-                ? "Start tracking your farm expenses to monitor your spending."
-                : "Try adjusting your filters to see more expenses."
-              }
-              icon="DollarSign"
-              actionLabel={expenses.length === 0 ? "Record Your First Expense" : "Clear Filters"}
-              onAction={expenses.length === 0 ? () => setShowForm(true) : () => {
-                setSelectedFarm('');
-                setCategoryFilter('');
-              }}
-            />
-          ) : (
-            <Card className="overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-surface-200">
-                  <thead className="bg-surface-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Description
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Category
-                      </th>
-                      {!selectedFarm && (
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Farm
-                        </th>
-                      )}
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-surface-200">
-                    <AnimatePresence>
-                      {sortedExpenses.map((expense, index) => (
-                        <motion.tr
-                          key={expense.Id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ delay: index * 0.02 }}
-                          className="hover:bg-surface-50 group"
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {format(new Date(expense.date), 'MMM d, yyyy')}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            <div className="max-w-xs truncate">{expense.description}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(expense.category)}`}>
-                              <ApperIcon name={getCategoryIcon(expense.category)} size={12} />
-                              {categoryOptions.find(opt => opt.value === expense.category)?.label || expense.category}
-                            </span>
-                          </td>
+{activeTab === 'table' && (
+            <>
+              {/* Expenses Table */}
+              {sortedExpenses.length === 0 ? (
+                <EmptyState
+                  title={expenses.length === 0 ? "No expenses recorded" : "No expenses match your filters"}
+                  description={expenses.length === 0 
+                    ? "Start tracking your farm expenses to monitor your spending."
+                    : "Try adjusting your filters to see more expenses."
+                  }
+                  icon="DollarSign"
+                  actionLabel={expenses.length === 0 ? "Record Your First Expense" : "Clear Filters"}
+                  onAction={expenses.length === 0 ? () => setShowForm(true) : () => {
+                    setSelectedFarm('');
+                    setCategoryFilter('');
+                  }}
+                />
+              ) : (
+                <Card className="overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-surface-200">
+                      <thead className="bg-surface-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Category
+                          </th>
                           {!selectedFarm && (
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                              {expense.farmName}
-                            </td>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Farm
+                            </th>
                           )}
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
-                            ${expense.amount.toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button
-                                variant="ghost"
-                                size="small"
-                                icon="Edit2"
-                                onClick={() => handleEditExpense(expense)}
-                              />
-                              <Button
-                                variant="ghost"
-                                size="small"
-                                icon="Trash2"
-                                onClick={() => handleDeleteExpense(expense.Id)}
-                                className="text-red-600 hover:text-red-700"
-                              />
-                            </div>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
-            </Card>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                          </th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-surface-200">
+                        <AnimatePresence>
+                          {sortedExpenses.map((expense, index) => (
+                            <motion.tr
+                              key={expense.Id}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ delay: index * 0.02 }}
+                              className="hover:bg-surface-50 group"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {format(new Date(expense.date), 'MMM d, yyyy')}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900">
+                                <div className="max-w-xs truncate">{expense.description}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(expense.category)}`}>
+                                  <ApperIcon name={getCategoryIcon(expense.category)} size={12} />
+                                  {categoryOptions.find(opt => opt.value === expense.category)?.label || expense.category}
+                                </span>
+                              </td>
+                              {!selectedFarm && (
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                  {expense.farmName}
+                                </td>
+                              )}
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                                ${expense.amount.toFixed(2)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="small"
+                                    icon="Edit2"
+                                    onClick={() => handleEditExpense(expense)}
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="small"
+                                    icon="Trash2"
+                                    onClick={() => handleDeleteExpense(expense.Id)}
+                                    className="text-red-600 hover:text-red-700"
+                                  />
+                                </div>
+                              </td>
+                            </motion.tr>
+                          ))}
+                        </AnimatePresence>
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              )}
+            </>
           )}
         </div>
 
@@ -431,8 +484,354 @@ const Expenses = () => {
               </div>
             </Card>
           </div>
-        )}
+)}
       </div>
+    </div>
+  );
+};
+
+// ExpenseCharts Component
+const ExpenseCharts = ({ 
+  expenses, 
+  farms, 
+  selectedFarm, 
+  onFarmChange, 
+  chartPeriod, 
+  onPeriodChange,
+  categoryOptions,
+  getCategoryColor,
+  getCategoryIcon 
+}) => {
+  const [activeChartTab, setActiveChartTab] = useState('category');
+  const [trendData, setTrendData] = useState([]);
+  const [farmComparison, setFarmComparison] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadChartData();
+  }, [selectedFarm, chartPeriod, expenses]);
+
+  const loadChartData = async () => {
+    if (expenses.length === 0) return;
+    
+    setLoading(true);
+    try {
+      const [trends, farmComp] = await Promise.all([
+        expenseService.getTrendData(chartPeriod, selectedFarm),
+        expenseService.getFarmComparison()
+      ]);
+      
+      setTrendData(trends);
+      setFarmComparison(farmComp);
+    } catch (error) {
+      toast.error('Failed to load chart data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter expenses for current selection
+  const filteredExpenses = selectedFarm 
+    ? expenses.filter(expense => expense.farmId === parseInt(selectedFarm, 10))
+    : expenses;
+
+  // Calculate category data for pie chart
+  const categoryData = filteredExpenses.reduce((acc, expense) => {
+    acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
+    return acc;
+  }, {});
+
+  const categoryChartData = {
+    series: Object.values(categoryData),
+    options: {
+      chart: {
+        type: 'pie',
+        height: 350
+      },
+      labels: Object.keys(categoryData).map(cat => 
+        categoryOptions.find(opt => opt.value === cat)?.label || cat
+      ),
+      colors: [
+        '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', 
+        '#EF4444', '#F59E0B', '#6B7280', '#6366F1', 
+        '#06B6D4', '#EC4899'
+      ],
+      legend: {
+        position: 'bottom'
+      },
+      dataLabels: {
+        formatter: function(val, opts) {
+          return `$${opts.w.globals.series[opts.seriesIndex].toFixed(0)}`;
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: function(val) {
+            return `$${val.toFixed(2)}`;
+          }
+        }
+      }
+    }
+  };
+
+  // Trend chart data
+  const trendChartData = {
+    series: [{
+      name: 'Total Expenses',
+      data: trendData.map(item => item.total)
+    }],
+    options: {
+      chart: {
+        type: 'line',
+        height: 350,
+        zoom: {
+          enabled: false
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth',
+        width: 3
+      },
+      colors: ['#10B981'],
+      xaxis: {
+        categories: trendData.map(item => {
+          if (chartPeriod === 'monthly') {
+            const [year, month] = item.period.split('-');
+            return `${new Date(year, month - 1).toLocaleDateString('en-US', { month: 'short' })} ${year}`;
+          }
+          return item.period;
+        })
+      },
+      yaxis: {
+        labels: {
+          formatter: function(val) {
+            return `$${val.toFixed(0)}`;
+          }
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: function(val) {
+            return `$${val.toFixed(2)}`;
+          }
+        }
+      }
+    }
+  };
+
+  // Farm comparison chart
+  const farmComparisonData = {
+    series: [{
+      name: 'Total Expenses',
+      data: Object.entries(farmComparison).map(([farmId, data]) => data.total)
+    }],
+    options: {
+      chart: {
+        type: 'bar',
+        height: 350
+      },
+      colors: ['#3B82F6'],
+      xaxis: {
+        categories: Object.keys(farmComparison).map(farmId => 
+          farms.find(f => f.Id === parseInt(farmId))?.name || `Farm ${farmId}`
+        )
+      },
+      yaxis: {
+        labels: {
+          formatter: function(val) {
+            return `$${val.toFixed(0)}`;
+          }
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: function(val) {
+            return `$${val.toFixed(2)}`;
+          }
+        }
+      },
+      dataLabels: {
+        enabled: false
+      }
+    }
+  };
+
+  const farmOptions = [
+    { value: '', label: 'All Farms' },
+    ...farms.map(farm => ({
+      value: farm.Id,
+      label: farm.name
+    }))
+  ];
+
+  const periodOptions = [
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'yearly', label: 'Yearly' }
+  ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="h-10 bg-surface-200 rounded animate-pulse flex-1" />
+          <div className="h-10 bg-surface-200 rounded animate-pulse w-32" />
+        </div>
+        <Card>
+          <div className="h-80 bg-surface-200 rounded animate-pulse" />
+        </Card>
+      </div>
+    );
+  }
+
+  if (expenses.length === 0) {
+    return (
+      <EmptyState
+        title="No expense data available"
+        description="Record some expenses to view charts and analytics."
+        icon="BarChart3"
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Chart Controls */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select
+          placeholder="Filter by farm"
+          value={selectedFarm}
+          onChange={(e) => onFarmChange(e.target.value)}
+          options={farmOptions}
+          className="flex-1"
+        />
+        
+        <Select
+          placeholder="Time period"
+          value={chartPeriod}
+          onChange={(e) => onPeriodChange(e.target.value)}
+          options={periodOptions}
+          className="w-40"
+        />
+      </div>
+
+      {/* Chart Tabs */}
+      <div className="flex space-x-1 bg-surface-100 p-1 rounded-lg max-w-2xl">
+        <button
+          onClick={() => setActiveChartTab('category')}
+          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeChartTab === 'category'
+              ? 'bg-white text-primary shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <ApperIcon name="PieChart" size={16} />
+            Category Breakdown
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveChartTab('trends')}
+          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeChartTab === 'trends'
+              ? 'bg-white text-primary shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <ApperIcon name="TrendingUp" size={16} />
+            Spending Trends
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveChartTab('farms')}
+          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeChartTab === 'farms'
+              ? 'bg-white text-primary shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <ApperIcon name="BarChart3" size={16} />
+            Farm Comparison
+          </div>
+        </button>
+      </div>
+
+      {/* Chart Content */}
+      <Card>
+        {activeChartTab === 'category' && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Expenses by Category
+              {selectedFarm && (
+                <span className="text-sm font-normal text-gray-600 ml-2">
+                  - {farms.find(f => f.Id === parseInt(selectedFarm))?.name}
+                </span>
+              )}
+            </h3>
+            {Object.keys(categoryData).length > 0 ? (
+              <Chart
+                options={categoryChartData.options}
+                series={categoryChartData.series}
+                type="pie"
+                height={400}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-80 text-gray-500">
+                No expense data available for the selected filters
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeChartTab === 'trends' && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Spending Trends ({chartPeriod === 'monthly' ? 'Monthly' : 'Yearly'})
+              {selectedFarm && (
+                <span className="text-sm font-normal text-gray-600 ml-2">
+                  - {farms.find(f => f.Id === parseInt(selectedFarm))?.name}
+                </span>
+              )}
+            </h3>
+            {trendData.length > 0 ? (
+              <Chart
+                options={trendChartData.options}
+                series={trendChartData.series}
+                type="line"
+                height={400}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-80 text-gray-500">
+                Not enough data to show trends
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeChartTab === 'farms' && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Expenses by Farm
+            </h3>
+            {Object.keys(farmComparison).length > 0 ? (
+              <Chart
+                options={farmComparisonData.options}
+                series={farmComparisonData.series}
+                type="bar"
+                height={400}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-80 text-gray-500">
+                No farm comparison data available
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
     </div>
   );
 };
