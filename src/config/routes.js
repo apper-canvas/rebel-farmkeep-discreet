@@ -4,9 +4,7 @@ import Crops from '@/components/pages/Crops';
 import Tasks from '@/components/pages/Tasks';
 import Expenses from '@/components/pages/Expenses';
 import Income from '@/components/pages/Income';
-import Reports from '@/components/pages/Reports';
 import Weather from '@/components/pages/Weather';
-
 export const routes = {
   dashboard: {
     id: 'dashboard',
@@ -49,13 +47,6 @@ income: {
     path: '/income',
     icon: 'TrendingUp',
     component: Income
-  },
-  reports: {
-    id: 'reports',
-    label: 'Reports',
-    path: '/reports',
-    icon: 'BarChart3',
-    component: Reports
   },
   weather: {
     id: 'weather',
