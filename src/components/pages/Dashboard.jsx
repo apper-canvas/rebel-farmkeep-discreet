@@ -18,6 +18,8 @@ import ErrorState from "@/components/molecules/ErrorState";
 import StatCard from "@/components/molecules/StatCard";
 import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
+import Modal from "@/components/atoms/Modal";
+import TaskForm from "@/components/organisms/TaskForm";
 
 const Dashboard = () => {
   const [todaysTasks, setTodaysTasks] = useState([]);
@@ -27,7 +29,8 @@ const [monthlyExpenses, setMonthlyExpenses] = useState(0);
   const [monthlyIncome, setMonthlyIncome] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   useEffect(() => {
     loadDashboardData();
   }, []);
@@ -85,7 +88,7 @@ const [tasks, crops, weather, expenses, income] = await Promise.all([
     }
   };
 
-  const handleToggleTask = async (taskId) => {
+const handleToggleTask = async (taskId) => {
     try {
       const updatedTask = await taskService.toggleComplete(taskId);
       setTodaysTasks(prev => 
@@ -97,6 +100,25 @@ const [tasks, crops, weather, expenses, income] = await Promise.all([
     } catch (error) {
       toast.error('Failed to update task');
     }
+  };
+
+  const handleSaveTask = async (savedTask) => {
+    try {
+      setTodaysTasks(prev => [...prev, savedTask]);
+      setShowTaskForm(false);
+      setEditingTask(null);
+      
+      // Refresh dashboard data to get updated stats
+      await loadDashboardData();
+      toast.success('Task created successfully');
+    } catch (error) {
+      toast.error('Failed to refresh dashboard data');
+    }
+  };
+
+  const handleCancelTaskForm = () => {
+    setShowTaskForm(false);
+    setEditingTask(null);
   };
 
   const staggerChildren = {
@@ -242,11 +264,11 @@ const [tasks, crops, weather, expenses, income] = await Promise.all([
           <div className="bg-white rounded-lg border border-surface-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Today's Tasks</h2>
-              <Button
+<Button
                 variant="outline"
                 size="small"
                 icon="Plus"
-                onClick={() => window.location.href = '/tasks'}
+                onClick={() => setShowTaskForm(true)}
               >
                 Add Task
               </Button>
@@ -341,8 +363,22 @@ const [tasks, crops, weather, expenses, income] = await Promise.all([
               </div>
             )}
           </div>
-        </motion.div>
+</motion.div>
       </div>
+
+      {/* Task Form Modal */}
+      <Modal
+        isOpen={showTaskForm}
+        onClose={handleCancelTaskForm}
+        title={editingTask ? 'Edit Task' : 'Add New Task'}
+        size="medium"
+      >
+        <TaskForm
+          task={editingTask}
+          onSave={handleSaveTask}
+          onCancel={handleCancelTaskForm}
+        />
+      </Modal>
     </motion.div>
   );
 };
