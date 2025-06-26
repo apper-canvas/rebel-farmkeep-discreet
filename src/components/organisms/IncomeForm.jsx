@@ -59,7 +59,7 @@ date: income.date ? income.date.split('T')[0] : new Date().toISOString().split('
     }
   };
 
-  const handleChange = (field, value) => {
+const handleChange = (field, value) => {
     // Extract value from event object if necessary
     const actualValue = value && typeof value === 'object' && value.target 
       ? value.target.value 

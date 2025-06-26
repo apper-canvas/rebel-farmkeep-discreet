@@ -15,11 +15,9 @@ const Input = ({
 }) => {
   const [focused, setFocused] = useState(false);
 
-  const handleChange = useCallback((e) => {
+const handleChange = useCallback((e) => {
     if (onChange && typeof onChange === 'function') {
-      // Ensure we always pass the actual value, not the event
-      const inputValue = e?.target?.value ?? e;
-      onChange(inputValue);
+      onChange(e);
     }
   }, [onChange]);
 

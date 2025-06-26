@@ -65,19 +65,12 @@ farmId: task?.farm_id || '',
   };
 
 const handleChange = (e) => {
-    // Handle different event types safely
-    const target = e?.target || e;
-    const name = target?.name || e?.name;
-    const value = target?.value !== undefined ? target.value : e?.value;
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Only proceed if we have valid name and value
-    if (name !== undefined) {
-      setFormData(prev => ({ ...prev, [name]: value }));
-      
-      // Clear error when user starts typing
-      if (errors[name]) {
-        setErrors(prev => ({ ...prev, [name]: '' }));
-      }
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 

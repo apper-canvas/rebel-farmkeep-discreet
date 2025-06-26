@@ -1,12 +1,12 @@
 import Input from '@/components/atoms/Input';
 import Select from '@/components/atoms/Select';
 
-const FormField = ({ type = 'input', ...props }) => {
+const FormField = ({ type = 'input', name, ...props }) => {
   if (type === 'select') {
-    return <Select {...props} />;
+    return <Select name={name} {...props} />;
   }
   
-  return <Input {...props} />;
+  return <Input name={name} {...props} />;
 };
 
 export default FormField;

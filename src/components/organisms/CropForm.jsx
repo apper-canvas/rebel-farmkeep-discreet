@@ -47,23 +47,7 @@ fieldLocation: crop?.field_location || '',
   };
 
 const handleChange = (e) => {
-    // Handle different event structures from FormField components
-    let name, value;
-    
-    if (e && e.target) {
-      // Standard input event structure
-      name = e.target.name;
-      value = e.target.value;
-    } else if (e && typeof e === 'object' && e.name !== undefined) {
-      // Alternative event structure that may be passed by some components
-      name = e.name;
-      value = e.value;
-    } else {
-      // Fallback - log the event structure for debugging
-      console.warn('Unexpected event structure in handleChange:', e);
-      return;
-    }
-    
+    const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
