@@ -29,7 +29,7 @@ const incomeService = {
   },
 
   // Create new income record
-  async create(incomeData) {
+async create(incomeData) {
     await delay(300);
     const newIncome = {
       ...incomeData,
@@ -38,7 +38,7 @@ const incomeService = {
       amount: parseFloat(incomeData.amount) || 0
     };
     
-    incomeData.push(newIncome);
+    mockData.push(newIncome);
     return { ...newIncome };
   },
 
