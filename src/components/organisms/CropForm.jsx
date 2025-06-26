@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import { motion } from 'framer-motion';
-import { format } from 'date-fns';
-import ApperIcon from '@/components/ApperIcon';
-import Button from '@/components/atoms/Button';
-import FormField from '@/components/molecules/FormField';
-import cropService from '@/services/api/cropService';
-import farmService from '@/services/api/farmService';
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
+import farmService from "@/services/api/farmService";
+import cropService from "@/services/api/cropService";
+import ApperIcon from "@/components/ApperIcon";
+import FormField from "@/components/molecules/FormField";
+import Button from "@/components/atoms/Button";
 
 const CropForm = ({ crop = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     farmId: crop?.farmId || '',
-    name: crop?.name || '',
+name: crop?.name || '',
     variety: crop?.variety || '',
-fieldLocation: crop?.field_location || '',
+    fieldLocation: crop?.field_location || '',
     plantingDate: crop?.planting_date ? format(new Date(crop.planting_date), 'yyyy-MM-dd') : '',
     expectedHarvestDate: crop?.expected_harvest_date ? format(new Date(crop.expected_harvest_date), 'yyyy-MM-dd') : '',
     status: crop?.status || 'planted'
@@ -125,15 +125,14 @@ const handleChange = (e) => {
     } catch (error) {
       toast.error(error.message || 'Failed to save crop');
     } finally {
-      setLoading(false);
+setLoading(false);
     }
   };
 
   const farmOptions = farms.map(farm => ({
     value: farm.Id,
-    label: `${farm.name} (${farm.location})`
+    label: `${farm.Name} (${farm.location})`
   }));
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
