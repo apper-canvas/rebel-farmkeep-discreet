@@ -21,8 +21,8 @@ const CropCard = ({ crop, onEdit, onDelete, showFarm = false }) => {
     harvested: 'Package'
   };
 
-  const plantingDate = new Date(crop.plantingDate);
-  const harvestDate = new Date(crop.expectedHarvestDate);
+const plantingDate = new Date(crop.planting_date);
+  const harvestDate = new Date(crop.expected_harvest_date);
   const daysUntilHarvest = differenceInDays(harvestDate, new Date());
   const daysGrowing = differenceInDays(new Date(), plantingDate);
 
@@ -64,9 +64,9 @@ const CropCard = ({ crop, onEdit, onDelete, showFarm = false }) => {
 
       <div className="space-y-3">
         {/* Field Location */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+<div className="flex items-center gap-2 text-sm text-gray-600">
           <ApperIcon name="MapPin" size={14} />
-          <span>{crop.fieldLocation}</span>
+          <span>{crop.field_location}</span>
         </div>
 
         {showFarm && crop.farmName && (

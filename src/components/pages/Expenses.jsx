@@ -46,8 +46,8 @@ const [selectedFarm, setSelectedFarm] = useState('');
       ]);
       
       // Add farm names to expenses
-      const expensesWithFarms = expensesData.map(expense => {
-        const farm = farmsData.find(f => f.Id === expense.farmId);
+const expensesWithFarms = expensesData.map(expense => {
+        const farm = farmsData.find(f => f.Id === expense.farm_id);
         return { ...expense, farmName: farm?.name || 'Unknown Farm' };
       });
       
@@ -62,8 +62,8 @@ const [selectedFarm, setSelectedFarm] = useState('');
   };
 
   const calculateCategoryTotals = () => {
-    const filteredExpenses = selectedFarm 
-      ? expenses.filter(expense => expense.farmId === parseInt(selectedFarm, 10))
+const filteredExpenses = selectedFarm 
+      ? expenses.filter(expense => expense.farm_id === parseInt(selectedFarm, 10))
       : expenses;
     
     const totals = filteredExpenses.reduce((acc, expense) => {
@@ -74,10 +74,9 @@ const [selectedFarm, setSelectedFarm] = useState('');
     setCategoryTotals(totals);
   };
 
-  const handleSaveExpense = (savedExpense) => {
-    const farm = farms.find(f => f.Id === savedExpense.farmId);
+const handleSaveExpense = (savedExpense) => {
+    const farm = farms.find(f => f.Id === savedExpense.farm_id);
     const expenseWithFarm = { ...savedExpense, farmName: farm?.name || 'Unknown Farm' };
-    
     if (editingExpense) {
       setExpenses(prev => prev.map(expense => 
         expense.Id === savedExpense.Id ? expenseWithFarm : expense
@@ -115,8 +114,8 @@ const [selectedFarm, setSelectedFarm] = useState('');
   };
 
   // Filter expenses based on selected filters
-  const filteredExpenses = expenses.filter(expense => {
-    const farmMatch = !selectedFarm || expense.farmId === parseInt(selectedFarm, 10);
+const filteredExpenses = expenses.filter(expense => {
+    const farmMatch = !selectedFarm || expense.farm_id === parseInt(selectedFarm, 10);
     const categoryMatch = !categoryFilter || expense.category === categoryFilter;
     return farmMatch && categoryMatch;
   });

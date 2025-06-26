@@ -11,7 +11,7 @@ const FarmForm = ({ farm = null, onSave, onCancel }) => {
     name: farm?.name || '',
     location: farm?.location || '',
     size: farm?.size || '',
-    sizeUnit: farm?.sizeUnit || 'acres'
+sizeUnit: farm?.size_unit || 'acres'
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);

@@ -1,113 +1,336 @@
-import mockData from '../mockData/income.json';
-
-// Simulate network delay
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Store for managing income data
-let incomeData = [...mockData];
-let nextId = Math.max(...incomeData.map(item => item.Id)) + 1;
+import { toast } from 'react-toastify';
 
 const incomeService = {
-  // Get all income records
   async getAll() {
-    await delay(200);
-    return [...incomeData];
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "Tags" } },
+          { field: { Name: "Owner" } },
+          { field: { Name: "source" } },
+          { field: { Name: "description" } },
+          { field: { Name: "amount" } },
+          { field: { Name: "date" } },
+          { field: { Name: "category" } },
+          { field: { Name: "farm_id" } },
+          { field: { Name: "crop_id" } }
+        ]
+      };
+      
+      const response = await apperClient.fetchRecords('income', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return [];
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching income:", error);
+      toast.error("Failed to fetch income");
+      return [];
+    }
   },
 
-  // Get income by ID
   async getById(id) {
-    await delay(200);
-    const parsedId = parseInt(id);
-    if (isNaN(parsedId)) {
-      throw new Error('Invalid ID format');
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "Tags" } },
+          { field: { Name: "Owner" } },
+          { field: { Name: "source" } },
+          { field: { Name: "description" } },
+          { field: { Name: "amount" } },
+          { field: { Name: "date" } },
+          { field: { Name: "category" } },
+          { field: { Name: "farm_id" } },
+          { field: { Name: "crop_id" } }
+        ]
+      };
+      
+      const response = await apperClient.getRecordById('income', parseInt(id), params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching income with ID ${id}:`, error);
+      toast.error("Failed to fetch income");
+      return null;
     }
-    const income = incomeData.find(item => item.Id === parsedId);
-    if (!income) {
-      throw new Error('Income record not found');
-    }
-    return { ...income };
   },
 
-  // Create new income record
-async create(incomeData) {
-    await delay(300);
-    const newIncome = {
-      ...incomeData,
-      Id: nextId++,
-      date: incomeData.date || new Date().toISOString().split('T')[0],
-      amount: parseFloat(incomeData.amount) || 0
-    };
-    
-    mockData.push(newIncome);
-    return { ...newIncome };
+  async create(incomeData) {
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      const params = {
+        records: [{
+          source: incomeData.source,
+          description: incomeData.description,
+          amount: parseFloat(incomeData.amount),
+          date: incomeData.date,
+          category: incomeData.category,
+          farm_id: incomeData.farmId ? parseInt(incomeData.farmId) : null,
+          crop_id: incomeData.cropId ? parseInt(incomeData.cropId) : null
+        }]
+      };
+      
+      const response = await apperClient.createRecord('income', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+      
+      if (response.results) {
+        const successfulRecords = response.results.filter(result => result.success);
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          
+          failedRecords.forEach(record => {
+            record.errors?.forEach(error => {
+              toast.error(`${error.fieldLabel}: ${error.message}`);
+            });
+            if (record.message) toast.error(record.message);
+          });
+        }
+        
+        return successfulRecords.length > 0 ? successfulRecords[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error creating income:", error);
+      toast.error("Failed to create income");
+      throw error;
+    }
   },
 
-  // Update existing income record
-  async update(id, updatedData) {
-    await delay(300);
-    const parsedId = parseInt(id);
-    if (isNaN(parsedId)) {
-      throw new Error('Invalid ID format');
+  async update(id, incomeData) {
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          source: incomeData.source,
+          description: incomeData.description,
+          amount: parseFloat(incomeData.amount),
+          date: incomeData.date,
+          category: incomeData.category,
+          farm_id: incomeData.farmId ? parseInt(incomeData.farmId) : null,
+          crop_id: incomeData.cropId ? parseInt(incomeData.cropId) : null
+        }]
+      };
+      
+      const response = await apperClient.updateRecord('income', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return null;
+      }
+      
+      if (response.results) {
+        const successfulUpdates = response.results.filter(result => result.success);
+        const failedUpdates = response.results.filter(result => !result.success);
+        
+        if (failedUpdates.length > 0) {
+          console.error(`Failed to update ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+          
+          failedUpdates.forEach(record => {
+            record.errors?.forEach(error => {
+              toast.error(`${error.fieldLabel}: ${error.message}`);
+            });
+            if (record.message) toast.error(record.message);
+          });
+        }
+        
+        return successfulUpdates.length > 0 ? successfulUpdates[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error updating income:", error);
+      toast.error("Failed to update income");
+      throw error;
     }
-    
-    const index = incomeData.findIndex(item => item.Id === parsedId);
-    if (index === -1) {
-      throw new Error('Income record not found');
-    }
-    
-    const updatedIncome = {
-      ...incomeData[index],
-      ...updatedData,
-      Id: parsedId, // Prevent ID changes
-      amount: parseFloat(updatedData.amount) || incomeData[index].amount
-    };
-    
-    incomeData[index] = updatedIncome;
-    return { ...updatedIncome };
   },
 
-  // Delete income record
   async delete(id) {
-    await delay(250);
-    const parsedId = parseInt(id);
-    if (isNaN(parsedId)) {
-      throw new Error('Invalid ID format');
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+      
+      const response = await apperClient.deleteRecord('income', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        toast.error(response.message);
+        return false;
+      }
+      
+      if (response.results) {
+        const successfulDeletions = response.results.filter(result => result.success);
+        const failedDeletions = response.results.filter(result => !result.success);
+        
+        if (failedDeletions.length > 0) {
+          console.error(`Failed to delete ${failedDeletions.length} records:${JSON.stringify(failedDeletions)}`);
+          
+          failedDeletions.forEach(record => {
+            if (record.message) toast.error(record.message);
+          });
+        }
+        
+        return successfulDeletions.length > 0;
+      }
+    } catch (error) {
+      console.error("Error deleting income:", error);
+      toast.error("Failed to delete income");
+      throw error;
     }
-    
-    const index = incomeData.findIndex(item => item.Id === parsedId);
-    if (index === -1) {
-      throw new Error('Income record not found');
-    }
-    
-    incomeData.splice(index, 1);
-    return { success: true };
   },
 
-  // Get income by date range
   async getByDateRange(startDate, endDate) {
-    await delay(200);
-    return incomeData.filter(item => {
-      const itemDate = new Date(item.date);
-      return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
-    }).map(item => ({ ...item }));
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "source" } },
+          { field: { Name: "description" } },
+          { field: { Name: "amount" } },
+          { field: { Name: "date" } },
+          { field: { Name: "category" } },
+          { field: { Name: "farm_id" } },
+          { field: { Name: "crop_id" } }
+        ],
+        where: [
+          {
+            FieldName: "date",
+            Operator: "GreaterThanOrEqualTo",
+            Values: [startDate]
+          },
+          {
+            FieldName: "date",
+            Operator: "LessThanOrEqualTo",
+            Values: [endDate]
+          }
+        ]
+      };
+      
+      const response = await apperClient.fetchRecords('income', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching income by date range:", error);
+      return [];
+    }
   },
 
-  // Get income by category
   async getByCategory(category) {
-    await delay(200);
-    return incomeData.filter(item => item.category === category).map(item => ({ ...item }));
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "source" } },
+          { field: { Name: "description" } },
+          { field: { Name: "amount" } },
+          { field: { Name: "date" } },
+          { field: { Name: "category" } },
+          { field: { Name: "farm_id" } },
+          { field: { Name: "crop_id" } }
+        ],
+        where: [
+          {
+            FieldName: "category",
+            Operator: "EqualTo",
+            Values: [category]
+          }
+        ]
+      };
+      
+      const response = await apperClient.fetchRecords('income', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching income by category:", error);
+      return [];
+    }
   },
 
-  // Get monthly total
   async getMonthlyTotal(month, year) {
-    await delay(200);
-    const monthlyIncome = incomeData.filter(item => {
-      const itemDate = new Date(item.date);
-      return itemDate.getMonth() === month && itemDate.getFullYear() === year;
-    });
-    
-    const total = monthlyIncome.reduce((sum, item) => sum + item.amount, 0);
-    return { total, count: monthlyIncome.length, items: monthlyIncome.map(item => ({ ...item })) };
+    try {
+      const startDate = new Date(year, month, 1).toISOString().split('T')[0];
+      const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+      
+      const monthlyIncome = await this.getByDateRange(startDate, endDate);
+      const total = monthlyIncome.reduce((sum, item) => sum + item.amount, 0);
+      
+      return { 
+        total, 
+        count: monthlyIncome.length, 
+        items: monthlyIncome
+      };
+    } catch (error) {
+      console.error("Error getting monthly total:", error);
+      return { total: 0, count: 0, items: [] };
+    }
   }
 };
 

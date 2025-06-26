@@ -34,9 +34,9 @@ const IncomeForm = ({ income, onSave, onCancel }) => {
         source: income.source || '',
         category: income.category || 'sales',
         description: income.description || '',
-        date: income.date ? income.date.split('T')[0] : new Date().toISOString().split('T')[0],
-        farmId: income.farmId || '',
-        cropId: income.cropId || ''
+date: income.date ? income.date.split('T')[0] : new Date().toISOString().split('T')[0],
+        farmId: income.farm_id || '',
+        cropId: income.crop_id || ''
       });
     }
   }, [income]);

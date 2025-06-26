@@ -13,9 +13,9 @@ const CropForm = ({ crop = null, onSave, onCancel }) => {
     farmId: crop?.farmId || '',
     name: crop?.name || '',
     variety: crop?.variety || '',
-    fieldLocation: crop?.fieldLocation || '',
-    plantingDate: crop?.plantingDate ? format(new Date(crop.plantingDate), 'yyyy-MM-dd') : '',
-    expectedHarvestDate: crop?.expectedHarvestDate ? format(new Date(crop.expectedHarvestDate), 'yyyy-MM-dd') : '',
+fieldLocation: crop?.field_location || '',
+    plantingDate: crop?.planting_date ? format(new Date(crop.planting_date), 'yyyy-MM-dd') : '',
+    expectedHarvestDate: crop?.expected_harvest_date ? format(new Date(crop.expected_harvest_date), 'yyyy-MM-dd') : '',
     status: crop?.status || 'planted'
   });
   const [farms, setFarms] = useState([]);

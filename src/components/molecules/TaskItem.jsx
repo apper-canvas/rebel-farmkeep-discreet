@@ -23,8 +23,8 @@ const TaskItem = ({
     high: 'ArrowUp'
   };
 
-  const isOverdue = new Date(task.dueDate) < new Date() && !task.completed;
-  const dueDate = new Date(task.dueDate);
+const isOverdue = new Date(task.due_date) < new Date() && !task.completed;
+  const dueDate = new Date(task.due_date);
 
   return (
     <motion.div

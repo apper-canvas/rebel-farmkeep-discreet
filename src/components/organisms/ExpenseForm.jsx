@@ -10,7 +10,7 @@ import farmService from '@/services/api/farmService';
 
 const ExpenseForm = ({ expense = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    farmId: expense?.farmId || '',
+farmId: expense?.farm_id || '',
     amount: expense?.amount || '',
     category: expense?.category || '',
     description: expense?.description || '',

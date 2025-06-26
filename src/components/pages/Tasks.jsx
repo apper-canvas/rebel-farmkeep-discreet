@@ -44,10 +44,10 @@ const Tasks = () => {
       ]);
       
       // Add farm and crop names to tasks
-      const tasksWithDetails = tasksData.map(task => {
-        const farm = farmsData.find(f => f.Id === task.farmId);
-        const crop = task.cropId ? cropsData.find(c => c.Id === task.cropId) : null;
-        return { 
+const tasksWithDetails = tasksData.map(task => {
+        const farm = farmsData.find(f => f.Id === task.farm_id);
+        const crop = task.crop_id ? cropsData.find(c => c.Id === task.crop_id) : null;
+        return {
           ...task, 
           farmName: farm?.name || 'Unknown Farm',
           cropName: crop ? `${crop.name} - ${crop.variety}` : null
@@ -65,10 +65,10 @@ const Tasks = () => {
     }
   };
 
-  const handleSaveTask = (savedTask) => {
-    const farm = farms.find(f => f.Id === savedTask.farmId);
-    const crop = savedTask.cropId ? crops.find(c => c.Id === savedTask.cropId) : null;
-    const taskWithDetails = { 
+const handleSaveTask = (savedTask) => {
+    const farm = farms.find(f => f.Id === savedTask.farm_id);
+    const crop = savedTask.crop_id ? crops.find(c => c.Id === savedTask.crop_id) : null;
+    const taskWithDetails = {
       ...savedTask, 
       farmName: farm?.name || 'Unknown Farm',
       cropName: crop ? `${crop.name} - ${crop.variety}` : null
@@ -108,10 +108,10 @@ const Tasks = () => {
   const handleToggleComplete = async (taskId) => {
     try {
       const updatedTask = await taskService.toggleComplete(taskId);
-      const farm = farms.find(f => f.Id === updatedTask.farmId);
-      const crop = updatedTask.cropId ? crops.find(c => c.Id === updatedTask.cropId) : null;
+const farm = farms.find(f => f.Id === updatedTask.farm_id);
+      const crop = updatedTask.crop_id ? crops.find(c => c.Id === updatedTask.crop_id) : null;
       const taskWithDetails = { 
-        ...updatedTask, 
+        ...updatedTask,
         farmName: farm?.name || 'Unknown Farm',
         cropName: crop ? `${crop.name} - ${crop.variety}` : null
       };
@@ -132,8 +132,8 @@ const Tasks = () => {
   };
 
   // Filter tasks based on selected filters
-  const filteredTasks = tasks.filter(task => {
-    const farmMatch = !selectedFarm || task.farmId === parseInt(selectedFarm, 10);
+const filteredTasks = tasks.filter(task => {
+    const farmMatch = !selectedFarm || task.farm_id === parseInt(selectedFarm, 10);
     const priorityMatch = !priorityFilter || task.priority === priorityFilter;
     
     let statusMatch = true;
@@ -141,20 +141,20 @@ const Tasks = () => {
       statusMatch = task.completed;
     } else if (statusFilter === 'pending') {
       statusMatch = !task.completed;
-    } else if (statusFilter === 'overdue') {
-      statusMatch = !task.completed && isPast(new Date(task.dueDate));
+} else if (statusFilter === 'overdue') {
+      statusMatch = !task.completed && isPast(new Date(task.due_date));
     } else if (statusFilter === 'today') {
-      statusMatch = isToday(new Date(task.dueDate));
+      statusMatch = isToday(new Date(task.due_date));
     }
     
     return farmMatch && priorityMatch && statusMatch;
   });
 
   // Sort tasks by due date
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
+const sortedTasks = [...filteredTasks].sort((a, b) => {
     // Put overdue and today's tasks first
-    const dateA = new Date(a.dueDate);
-    const dateB = new Date(b.dueDate);
+    const dateA = new Date(a.due_date);
+    const dateB = new Date(b.due_date);
     
     const isOverdueA = !a.completed && isPast(dateA);
     const isOverdueB = !b.completed && isPast(dateB);

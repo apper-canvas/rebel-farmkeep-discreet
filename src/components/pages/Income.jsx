@@ -291,17 +291,17 @@ const Income = () => {
                             {format(new Date(incomeItem.date), 'MMM d, yyyy')}
                           </div>
                           
-                          {incomeItem.farmId && (
+{incomeItem.farm_id && (
                             <div className="flex items-center gap-1">
                               <ApperIcon name="Map" size={16} />
-                              {getFarmName(incomeItem.farmId)}
+                              {getFarmName(incomeItem.farm_id)}
                             </div>
                           )}
                           
-                          {incomeItem.cropId && (
+{incomeItem.crop_id && (
                             <div className="flex items-center gap-1">
                               <ApperIcon name="Sprout" size={16} />
-                              {getCropName(incomeItem.cropId)}
+                              {getCropName(incomeItem.crop_id)}
                             </div>
                           )}
                         </div>

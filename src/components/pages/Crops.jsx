@@ -38,8 +38,8 @@ const Crops = () => {
       ]);
       
       // Add farm names to crops
-      const cropsWithFarms = cropsData.map(crop => {
-        const farm = farmsData.find(f => f.Id === crop.farmId);
+const cropsWithFarms = cropsData.map(crop => {
+        const farm = farmsData.find(f => f.Id === crop.farm_id);
         return { ...crop, farmName: farm?.name || 'Unknown Farm' };
       });
       
@@ -94,8 +94,8 @@ const Crops = () => {
   };
 
   // Filter crops based on selected filters
-  const filteredCrops = crops.filter(crop => {
-    const farmMatch = !selectedFarm || crop.farmId === parseInt(selectedFarm, 10);
+const filteredCrops = crops.filter(crop => {
+    const farmMatch = !selectedFarm || crop.farm_id === parseInt(selectedFarm, 10);
     const statusMatch = !statusFilter || crop.status === statusFilter;
     return farmMatch && statusMatch;
   });

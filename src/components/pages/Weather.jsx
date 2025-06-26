@@ -188,7 +188,7 @@ const Weather = () => {
                 
                 <div className="text-center p-4 bg-surface-50 rounded-lg">
                   <ApperIcon name="Wind" size={24} className="text-gray-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-gray-900">{todaysWeather.windSpeed}</div>
+<div className="text-2xl font-bold text-gray-900">{todaysWeather.wind_speed}</div>
                   <div className="text-sm text-gray-600">mph</div>
                 </div>
               </div>

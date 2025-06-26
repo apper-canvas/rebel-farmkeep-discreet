@@ -191,19 +191,19 @@ const Farms = () => {
 
                 {/* Farm Stats */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-surface-50 rounded-lg">
+<div className="flex items-center justify-between p-3 bg-surface-50 rounded-lg">
                     <div className="flex items-center gap-2">
                       <ApperIcon name="Maximize" size={16} className="text-primary" />
                       <span className="text-sm font-medium text-gray-700">Size</span>
                     </div>
                     <span className="text-sm font-semibold text-gray-900">
-                      {farm.size} {farm.sizeUnit}
+                      {farm.size} {farm.size_unit}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between text-sm text-gray-600">
                     <span>Created</span>
-                    <span>{new Date(farm.createdAt).toLocaleDateString()}</span>
+                    <span>{new Date(farm.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
 

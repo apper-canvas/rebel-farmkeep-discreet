@@ -11,11 +11,11 @@ import cropService from '@/services/api/cropService';
 
 const TaskForm = ({ task = null, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    farmId: task?.farmId || '',
-    cropId: task?.cropId || '',
+farmId: task?.farm_id || '',
+    cropId: task?.crop_id || '',
     title: task?.title || '',
     description: task?.description || '',
-    dueDate: task?.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : '',
+    dueDate: task?.due_date ? format(new Date(task.due_date), "yyyy-MM-dd'T'HH:mm") : '',
     priority: task?.priority || 'medium'
   });
   const [farms, setFarms] = useState([]);
