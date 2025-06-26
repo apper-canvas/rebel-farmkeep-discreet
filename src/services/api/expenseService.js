@@ -158,7 +158,8 @@ expenses.splice(index, 1);
       }
       cropData[expense.category] += expense.amount;
     });
-
-    return cropData;
+return cropData;
   }
 };
+
+export default expenseService;
