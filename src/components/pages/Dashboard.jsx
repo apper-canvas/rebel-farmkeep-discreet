@@ -1,26 +1,30 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { format, isToday } from 'date-fns';
-import { toast } from 'react-toastify';
-import ApperIcon from '@/components/ApperIcon';
-import StatCard from '@/components/molecules/StatCard';
-import WeatherCard from '@/components/molecules/WeatherCard';
-import TaskItem from '@/components/molecules/TaskItem';
-import CropCard from '@/components/molecules/CropCard';
-import SkeletonLoader from '@/components/molecules/SkeletonLoader';
-import EmptyState from '@/components/molecules/EmptyState';
-import ErrorState from '@/components/molecules/ErrorState';
-import Button from '@/components/atoms/Button';
-import taskService from '@/services/api/taskService';
-import cropService from '@/services/api/cropService';
-import weatherService from '@/services/api/weatherService';
-import expenseService from '@/services/api/expenseService';
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { format, isToday } from "date-fns";
+import { toast } from "react-toastify";
+import incomeService from "@/services/api/incomeService";
+import expenseService from "@/services/api/expenseService";
+import weatherService from "@/services/api/weatherService";
+import cropService from "@/services/api/cropService";
+import taskService from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
+import Crops from "@/components/pages/Crops";
+import SkeletonLoader from "@/components/molecules/SkeletonLoader";
+import TaskItem from "@/components/molecules/TaskItem";
+import EmptyState from "@/components/molecules/EmptyState";
+import CropCard from "@/components/molecules/CropCard";
+import WeatherCard from "@/components/molecules/WeatherCard";
+import ErrorState from "@/components/molecules/ErrorState";
+import StatCard from "@/components/molecules/StatCard";
+import Card from "@/components/atoms/Card";
+import Button from "@/components/atoms/Button";
 
 const Dashboard = () => {
   const [todaysTasks, setTodaysTasks] = useState([]);
   const [activeCrops, setActiveCrops] = useState([]);
   const [todaysWeather, setTodaysWeather] = useState(null);
-  const [monthlyExpenses, setMonthlyExpenses] = useState(0);
+const [monthlyExpenses, setMonthlyExpenses] = useState(0);
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,11 +37,12 @@ const Dashboard = () => {
     setError(null);
     
     try {
-      const [tasks, crops, weather, expenses] = await Promise.all([
+const [tasks, crops, weather, expenses, income] = await Promise.all([
         taskService.getTodaysTasks(),
         cropService.getAll(),
         weatherService.getTodaysWeather(),
-        expenseService.getAll()
+        expenseService.getAll(),
+        incomeService.getAll()
       ]);
 
       setTodaysTasks(tasks);
@@ -50,10 +55,11 @@ const Dashboard = () => {
       
       setTodaysWeather(weather);
       
-      // Calculate current month expenses
+// Calculate current month expenses and income
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
-      const monthlyTotal = expenses
+      
+      const monthlyExpenseTotal = expenses
         .filter(expense => {
           const expenseDate = new Date(expense.date);
           return expenseDate.getMonth() === currentMonth && 
@@ -61,7 +67,16 @@ const Dashboard = () => {
         })
         .reduce((total, expense) => total + expense.amount, 0);
       
-      setMonthlyExpenses(monthlyTotal);
+      const monthlyIncomeTotal = income
+        .filter(incomeItem => {
+          const incomeDate = new Date(incomeItem.date);
+          return incomeDate.getMonth() === currentMonth && 
+                 incomeDate.getFullYear() === currentYear;
+        })
+        .reduce((total, incomeItem) => total + incomeItem.amount, 0);
+      
+      setMonthlyExpenses(monthlyExpenseTotal);
+      setMonthlyIncome(monthlyIncomeTotal);
     } catch (err) {
       setError(err.message || 'Failed to load dashboard data');
       toast.error('Failed to load dashboard');
@@ -167,6 +182,14 @@ const Dashboard = () => {
           color="accent"
         />
         
+<StatCard
+          title="Month Income"
+          value={`$${monthlyIncome.toFixed(2)}`}
+          subtitle={format(new Date(), 'MMMM yyyy')}
+          icon="TrendingUp"
+          color="success"
+        />
+        
         <StatCard
           title="Month Expenses"
           value={`$${monthlyExpenses.toFixed(2)}`}
@@ -174,6 +197,43 @@ const Dashboard = () => {
           icon="DollarSign"
           color="warning"
         />
+      </motion.div>
+
+      {/* Profit/Loss Summary */}
+      <motion.div variants={fadeInUp}>
+        <Card className={`p-6 ${monthlyIncome >= monthlyExpenses ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {format(new Date(), 'MMMM yyyy')} Summary
+              </h3>
+              <p className="text-gray-600">
+                {monthlyIncome >= monthlyExpenses 
+                  ? `Profit: $${(monthlyIncome - monthlyExpenses).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                  : `Loss: $${(monthlyExpenses - monthlyIncome).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                }
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="small"
+                icon="TrendingUp"
+                onClick={() => window.location.href = '/income'}
+              >
+                View Income
+              </Button>
+              <Button
+                variant="outline"
+                size="small"
+                icon="BarChart3"
+                onClick={() => window.location.href = '/reports'}
+              >
+                Full Report
+              </Button>
+            </div>
+          </div>
+        </Card>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

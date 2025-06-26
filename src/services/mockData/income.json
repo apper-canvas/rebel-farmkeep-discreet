@@ -1,0 +1,52 @@
+[
+  {
+    "Id": 1,
+    "source": "Crop Sales",
+    "description": "Tomato harvest sale - 500 lbs",
+    "amount": 2500.00,
+    "date": "2024-01-15",
+    "category": "sales",
+    "farmId": 1,
+    "cropId": 1
+  },
+  {
+    "Id": 2,
+    "source": "Farmers Market",
+    "description": "Weekly market sales - mixed vegetables",
+    "amount": 450.00,
+    "date": "2024-01-20",
+    "category": "market",
+    "farmId": 1,
+    "cropId": null
+  },
+  {
+    "Id": 3,
+    "source": "Contract Sale",
+    "description": "Corn delivery to processor",
+    "amount": 3200.00,
+    "date": "2024-01-22",
+    "category": "contract",
+    "farmId": 2,
+    "cropId": 2
+  },
+  {
+    "Id": 4,
+    "source": "Direct Sales",
+    "description": "Farm stand sales - potatoes",
+    "amount": 180.00,
+    "date": "2024-01-25",
+    "category": "direct",
+    "farmId": 1,
+    "cropId": 3
+  },
+  {
+    "Id": 5,
+    "source": "Wholesale",
+    "description": "Bulk vegetable sale to restaurant",
+    "amount": 1200.00,
+    "date": "2024-01-28",
+    "category": "wholesale",
+    "farmId": 1,
+    "cropId": null
+  }
+]

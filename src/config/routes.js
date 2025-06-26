@@ -3,6 +3,8 @@ import Farms from '@/components/pages/Farms';
 import Crops from '@/components/pages/Crops';
 import Tasks from '@/components/pages/Tasks';
 import Expenses from '@/components/pages/Expenses';
+import Income from '@/components/pages/Income';
+import Reports from '@/components/pages/Reports';
 import Weather from '@/components/pages/Weather';
 
 export const routes = {
@@ -40,6 +42,20 @@ export const routes = {
     path: '/expenses',
     icon: 'DollarSign',
     component: Expenses
+  },
+income: {
+    id: 'income',
+    label: 'Income',
+    path: '/income',
+    icon: 'TrendingUp',
+    component: Income
+  },
+  reports: {
+    id: 'reports',
+    label: 'Reports',
+    path: '/reports',
+    icon: 'BarChart3',
+    component: Reports
   },
   weather: {
     id: 'weather',
