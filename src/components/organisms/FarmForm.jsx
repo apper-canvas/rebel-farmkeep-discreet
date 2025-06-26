@@ -23,8 +23,24 @@ sizeUnit: farm?.size_unit || 'acres'
     { value: 'sq-m', label: 'Square Meters' }
   ];
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+const handleChange = (e) => {
+    // Handle both standard DOM events and direct value calls
+    let name, value;
+    
+    if (e && e.target) {
+      // Standard DOM event with target
+      name = e.target.name;
+      value = e.target.value;
+    } else if (e && typeof e === 'object' && e.name && e.hasOwnProperty('value')) {
+      // Custom event object with name and value properties
+      name = e.name;
+      value = e.value;
+    } else {
+      // Fallback - log warning and return early to prevent errors
+      console.warn('handleChange: Invalid event object received', e);
+      return;
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
