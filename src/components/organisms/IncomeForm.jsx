@@ -1,40 +1,44 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
-import FormField from '@/components/molecules/FormField';
-import Button from '@/components/atoms/Button';
-import farmService from '@/services/api/farmService';
-import cropService from '@/services/api/cropService';
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import farmService from "@/services/api/farmService";
+import cropService from "@/services/api/cropService";
+import FormField from "@/components/molecules/FormField";
+import Button from "@/components/atoms/Button";
 
 const IncomeForm = ({ income, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    source: '',
-    description: '',
     amount: '',
-    date: new Date().toISOString().split('T')[0],
+    source: '',
     category: 'sales',
+    description: '',
+    date: new Date().toISOString().split('T')[0],
     farmId: '',
     cropId: ''
   });
+  
   const [farms, setFarms] = useState([]);
   const [crops, setCrops] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    loadFarms();
+    loadCrops();
+  }, []);
 
   useEffect(() => {
     if (income) {
       setFormData({
-        source: income.source || '',
-        description: income.description || '',
         amount: income.amount?.toString() || '',
-        date: income.date || new Date().toISOString().split('T')[0],
+        source: income.source || '',
         category: income.category || 'sales',
-        farmId: income.farmId?.toString() || '',
-        cropId: income.cropId?.toString() || ''
+        description: income.description || '',
+        date: income.date ? income.date.split('T')[0] : new Date().toISOString().split('T')[0],
+        farmId: income.farmId || '',
+        cropId: income.cropId || ''
       });
-      setIsEditing(true);
     }
-    loadFarms();
-    loadCrops();
   }, [income]);
 
   const loadFarms = async () => {
@@ -42,7 +46,7 @@ const IncomeForm = ({ income, onSave, onCancel }) => {
       const farmData = await farmService.getAll();
       setFarms(farmData);
     } catch (error) {
-      toast.error('Failed to load farms');
+      console.error('Error loading farms:', error);
     }
   };
 
@@ -51,46 +55,93 @@ const IncomeForm = ({ income, onSave, onCancel }) => {
       const cropData = await cropService.getAll();
       setCrops(cropData);
     } catch (error) {
-      toast.error('Failed to load crops');
+      console.error('Error loading crops:', error);
     }
   };
 
   const handleChange = (field, value) => {
+    // Extract value from event object if necessary
+    const actualValue = value && typeof value === 'object' && value.target 
+      ? value.target.value 
+      : value;
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: actualValue
     }));
+    
+    // Clear error for this field if it exists
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: null
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.amount || isNaN(parseFloat(formData.amount)) || parseFloat(formData.amount) <= 0) {
+      newErrors.amount = 'Please enter a valid amount greater than 0';
+    }
+    
+    if (!formData.source?.trim()) {
+      newErrors.source = 'Please enter an income source';
+    }
+    
+    if (!formData.category) {
+      newErrors.category = 'Please select a category';
+    }
+    
+    if (!formData.date) {
+      newErrors.date = 'Please select a date';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.source.trim()) {
-      toast.error('Income source is required');
+    if (!validateForm()) {
+      toast.error('Please fix the form errors before submitting');
       return;
     }
     
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      toast.error('Valid amount is required');
-      return;
-    }
-
-    setLoading(true);
+    setSubmitting(true);
     
     try {
       const incomeData = {
-        ...formData,
         amount: parseFloat(formData.amount),
-        farmId: formData.farmId ? parseInt(formData.farmId) : null,
-        cropId: formData.cropId ? parseInt(formData.cropId) : null
+        source: formData.source.trim(),
+        category: formData.category,
+        description: formData.description?.trim() || '',
+        date: formData.date,
+        farmId: formData.farmId || null,
+        cropId: formData.cropId || null
       };
       
       await onSave(incomeData);
-      toast.success(isEditing ? 'Income updated successfully' : 'Income added successfully');
+      toast.success(income ? 'Income updated successfully' : 'Income added successfully');
+      
+      // Reset form if adding new income
+      if (!income) {
+        setFormData({
+          amount: '',
+          source: '',
+          category: 'sales',
+          description: '',
+          date: new Date().toISOString().split('T')[0],
+          farmId: '',
+          cropId: ''
+        });
+      }
     } catch (error) {
       toast.error(error.message || 'Failed to save income');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -104,14 +155,14 @@ const IncomeForm = ({ income, onSave, onCancel }) => {
   ];
 
   const farmOptions = farms.map(farm => ({
-    value: farm.Id.toString(),
+    value: farm.Id,
     label: farm.name
   }));
 
   const cropOptions = [
     { value: '', label: 'No specific crop' },
     ...crops.map(crop => ({
-      value: crop.Id.toString(),
+      value: crop.Id,
       label: `${crop.name} (${crop.variety})`
     }))
   ];
@@ -120,22 +171,44 @@ const IncomeForm = ({ income, onSave, onCancel }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
-          label="Income Source"
-          type="text"
-          value={formData.source}
-          onChange={(value) => handleChange('source', value)}
-          placeholder="e.g., Crop Sales, Farmers Market"
+          label="Amount"
+          type="number"
+          step="0.01"
+          placeholder="Enter amount"
+          value={formData.amount}
+          onChange={(value) => handleChange('amount', value)}
+          error={errors.amount}
           required
         />
         
         <FormField
-          label="Amount"
-          type="number"
-          value={formData.amount}
-          onChange={(value) => handleChange('amount', value)}
-          placeholder="0.00"
-          step="0.01"
-          min="0"
+          label="Source"
+          type="text"
+          placeholder="e.g., Tomato harvest, Market sale"
+          value={formData.source}
+          onChange={(value) => handleChange('source', value)}
+          error={errors.source}
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          label="Category"
+          type="select"
+          options={categoryOptions}
+          value={formData.category}
+          onChange={(value) => handleChange('category', value)}
+          error={errors.category}
+          required
+        />
+        
+        <FormField
+          label="Date"
+          type="date"
+          value={formData.date}
+          onChange={(value) => handleChange('date', value)}
+          error={errors.date}
           required
         />
       </div>
@@ -143,64 +216,46 @@ const IncomeForm = ({ income, onSave, onCancel }) => {
       <FormField
         label="Description"
         type="textarea"
+        placeholder="Additional details about this income..."
         value={formData.description}
         onChange={(value) => handleChange('description', value)}
-        placeholder="Describe the income source or transaction details..."
         rows={3}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
-          label="Date"
-          type="date"
-          value={formData.date}
-          onChange={(value) => handleChange('date', value)}
-          required
-        />
-        
-        <FormField
-          label="Category"
+          label="Farm (Optional)"
           type="select"
-          value={formData.category}
-          onChange={(value) => handleChange('category', value)}
-          options={categoryOptions}
-          required
-        />
-        
-        <FormField
-          label="Farm"
-          type="select"
+          options={[{ value: '', label: 'Select a farm' }, ...farmOptions]}
           value={formData.farmId}
           onChange={(value) => handleChange('farmId', value)}
-          options={[{ value: '', label: 'Select Farm' }, ...farmOptions]}
+        />
+        
+        <FormField
+          label="Crop (Optional)"
+          type="select"
+          options={cropOptions}
+          value={formData.cropId}
+          onChange={(value) => handleChange('cropId', value)}
         />
       </div>
 
-      <FormField
-        label="Related Crop (Optional)"
-        type="select"
-        value={formData.cropId}
-        onChange={(value) => handleChange('cropId', value)}
-        options={cropOptions}
-      />
-
-      <div className="flex gap-3 pt-4">
-        <Button
-          type="submit"
-          variant="primary"
-          loading={loading}
-          disabled={loading}
-        >
-          {isEditing ? 'Update Income' : 'Add Income'}
-        </Button>
-        
+      <div className="flex justify-end gap-3 pt-4 border-t border-surface-200">
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
-          disabled={loading}
+          disabled={submitting}
         >
           Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="primary"
+          loading={submitting}
+          disabled={submitting}
+        >
+          {income ? 'Update Income' : 'Add Income'}
         </Button>
       </div>
     </form>
